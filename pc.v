@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: üçgen takýmý
+// Company: ï¿½ï¿½gen takï¿½mï¿½
 // Engineer: Birce
 // 
 // Create Date: 05.10.2024 
@@ -20,8 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module program_counter(clk,immbj,jump,pcmux,pc
- );
+module program_counter(clk,immbj,jump,pcmux,pc);
 input [31:0]immbj,jump;
 input clk;
 input [1:0]pcmux;
