@@ -78,6 +78,6 @@ module ALU(a, b, ctrl, result, zeroFlag, LessFlag);
     
     
     //Eger sonuc = 0 ise zeroFlag 1 olmali
-    assign zeroFlag = result ? 0 : 1;
+    assign zeroFlag = (result == 0) ? 1 : 0;
     
 endmodule
