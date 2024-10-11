@@ -28,16 +28,16 @@ output reg[31:0] pc;
 
 always@(posedge clk)
 
-    begin
-       case(pcmux)
+   begin
+        case(pcmux)
            
-          2'b11 : pc = pc + 4;
-          2'b10 : pc = pc + immbj;
-          2'b01 : pc = jump;  
-          2'b00 : pc = 32'h0000_0000;
-          default: pc = pc + 4;
+            2'b11 : pc = pc + 4;
+            2'b10 : pc = pc + immbj;
+            2'b01 : pc = jump;  
+            2'b00 : pc = 32'h0000_0000;
+            default: pc = pc + 4;
           
-       endcase
+        endcase
        
     end
 endmodule
