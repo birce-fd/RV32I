@@ -77,39 +77,45 @@ module ControlUnit(instr, ALUAsrc, ALUBsrc, ALUctrl, Branch, memToReg, MemOp, Me
                     
                     case (func3)
                     //  ADD, SUB
-                    3'b000 : begin
-                            ALUctrl = (func7 == 7'b0) ? 4'b0000 : 4'b1011; //ADD : SUB
-                            end
+                    3'b000 : ALUctrl = (func7 == 7'b0) ? 4'b0000 : 4'b1011; //ADD : SUB
                     //  SLL
-                    3'b001 : begin
-                            ALUctrl = 4'b1000;
-                            end
+                    3'b001 : ALUctrl = 4'b1000;
                     //  SLT
-                    3'b010 : begin
-                            ALUctrl = 4'b0001;
-                            end
+                    3'b010 : ALUctrl = 4'b0001;
                     //  SLTU
-                    3'b011 : begin
-                            ALUctrl = 4'b0010;
-                            end
+                    3'b011 : ALUctrl = 4'b0010;
                     //  XOR
-                    3'b100 : begin
-                            ALUctrl = 4'b0011;
-                            end
+                    3'b100 : ALUctrl = 4'b0011;
                     //  SRL, SRA
-                    3'b101 : begin
-                            ALUctrl = (func7 == 7'b0) ? 4'b1001 : 4'b1010; //SRL : SRA
-                            end
+                    3'b101 : ALUctrl = (func7 == 7'b0) ? 4'b1001 : 4'b1010; //SRL : SRA
                     //  OR
-                    3'b110 : begin
-                            ALUctrl = 4'b0100;
-                            end
+                    3'b110 : ALUctrl = 4'b0100;
                     //AND
-                    3'b111 : begin
-                            ALUctrl = 4'b0111;
-                            end
+                    3'b111 : ALUctrl = 4'b0111;
                     endcase
                     end
+        //  I - TYPE
+        7'b0010011 :  begin
+                    ALUAsrc = 0;    //rs1
+                    ALUBsrc = 2'b01;//offset
+                    Branch = 3'b111;//No Branch
+                    memToReg = 1;   //ALU result
+                    MemOp = 0;      //Yazma okuma yok
+                    MemWr = 0;
+                    RegWr = 1;      //Registera yazilir
+                    
+                    case (func3)
+                    3'b000 : ALUctrl = 4'b0000; //ADDI
+                    3'b010 : ALUctrl = 4'b0001; //SLTI    
+                    3'b011 : ALUctrl = 4'b0001; //SLTIU
+                    3'b100 : ALUctrl = 4'b0011; //XORI
+                    3'b110 : ALUctrl = 4'b0100; //ORI
+                    3'b111 : ALUctrl = 4'b0111; //ANDI
+                    3'b001 : ALUctrl = (func7 == 7'b0) ? 4'b1000 : 4'bx; //SLLI
+                    3'b101 : ALUctrl = (func7 == 7'b0) ? 4'b1001 : (func7 == 7'b0100000) ? 4'b1010 : 4'bx; //SRLI : SRAI : DC
+                    endcase
+                    end
+        
         endcase    
     end
     
