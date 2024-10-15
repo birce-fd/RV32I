@@ -51,30 +51,45 @@ module branch_condition(branch, LessFlag, ZeroFlag, PCAsrc, PCBsrc);
     
     
     initial begin
-        PCAsrc = 1;
-        PCBsrc = 0;
+        PCAsrc = 1; //+4
+        PCBsrc = 0; //PC
     end
     
     always @ (*) begin
         
         case (branch)
-            //  BEQ
-            3'b000 : PCAsrc = (ZeroFlag == 1) ? 0 : 1;
-            //  BNE
-            3'b001 : PCAsrc = (ZeroFlag != 1) ? 0 : 1;
-            //  BLT BLTU
-            3'b010 : PCAsrc = (LessFlag == 1) ? 0 : 1;
-            //  BGE BGEU
-            3'b011 : PCAsrc = (LessFlag != 1) ? 0 : 1;
-            //  JAL     PC + offset -> PCA = 0, PCB = 0
-            3'b100 : PCAsrc = 0;
-            //  JALR    rs1 + offset -> PCA = 0, PCB = 1
-            3'b101 : begin
-                    PCAsrc = 0;
-                    PCBsrc = 1;
+            3'b000 : begin  //BEQ
+                        PCAsrc = (ZeroFlag == 1) ? 0 : 1;
+                        PCBsrc = 0;
                     end
-            //  NO BRANCH
-            3'b111 : PCAsrc = 1;
+            3'b001 : begin  //BNE
+                        PCAsrc = (ZeroFlag != 1) ? 0 : 1;
+                        PCBsrc = 0;
+                        end
+            3'b010 : begin  //  BLT BLTU
+                        PCAsrc = (LessFlag == 1) ? 0 : 1;
+                        PCBsrc = 0;
+                     end   
+            3'b011 : begin  //  BGE BGEU
+                    PCAsrc = (LessFlag != 1) ? 0 : 1;
+                    PCBsrc = 0;
+                    end  
+            3'b100 : begin  //  JAL     PC + offset -> PCA = 0, PCB = 0
+                    PCAsrc = 0;//imm
+                    PCBsrc = 0;//PC
+                    end          
+            3'b101 : begin  //  JALR    rs1 + offset -> PCA = 0, PCB = 1
+                     PCAsrc = 0;//imm
+                     PCBsrc = 1;//rs1
+                     end
+            3'b110 : begin  
+                    PCAsrc = 1;//+4
+                    PCBsrc = 0;//PC
+                    end
+            3'b111 : begin
+                    PCAsrc = 1;//+4
+                    PCBsrc = 1;//rs1
+                    end
             default : PCAsrc = 1;
         endcase
     
