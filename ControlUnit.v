@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module ControlUnit(instr, ALUAsrc, ALUBsrc, ALUctrl, Branch, memToReg, MemOp, MemWr, RegWr);
+module ControlUnit(instr, ALUAsrc, ALUBsrc, ALUctrl, Branch, memToReg, MemOp, MemWr, RegWr, PCAsrc, PCBsrc);
     input [31:0] instr; // [6:0]opcode, [31:25] func7, [14:12] func3
     output reg ALUAsrc;         // 0 -> rs1, 1 -> PC
     output reg [1:0]ALUBsrc;    // 00 -> rs2, 01 -> imm, 10 -> 4, 11 -> x
@@ -30,6 +30,7 @@ module ControlUnit(instr, ALUAsrc, ALUBsrc, ALUctrl, Branch, memToReg, MemOp, Me
     output reg MemOp;
     output reg MemWr;
     output reg RegWr;
+    output reg PCAsrc, PCBsrc;
     
     wire [6:0]op = instr[6:0];
     wire [2:0]func3 = instr[14:12];
@@ -42,23 +43,21 @@ module ControlUnit(instr, ALUAsrc, ALUBsrc, ALUctrl, Branch, memToReg, MemOp, Me
         //  U TYPE
         //  LUI
         7'b0110111 : begin
-                    
-                    ALUAsrc = 0;
-                    ALUBsrc = 2'b01;
-                    ALUctrl = 4'b0;
-                    Branch = 3'b111;
-                    memToReg = 1;
-                    MemOp = 0;
+                    ALUAsrc = 0;    //rs1
+                    ALUBsrc = 2'b01;//imm
+                    ALUctrl = 4'b0; //ADD
+                    Branch = 3'b110;//PC + 4
+                    memToReg = 1;   //ALU result
+                    MemOp = 0;      //Yazma OKuma yok
                     MemWr = 0;
-                    RegWr = 1;
+                    RegWr = 1;      //Registera yazılır
                     end
         //  AIUPC
         7'b0010111 : begin
-                    
                     ALUAsrc = 1;    //PC
                     ALUBsrc = 2'b01;//imm
                     ALUctrl = 4'b0; //ADD
-                    Branch = 3'b111;//No Branch
+                    Branch = 3'b110;//PC + 4
                     memToReg = 1;   //ALU result
                     MemOp = 0;      //Yazma okuma yok
                     MemWr = 0;
@@ -66,15 +65,13 @@ module ControlUnit(instr, ALUAsrc, ALUBsrc, ALUctrl, Branch, memToReg, MemOp, Me
                     end
         //  R - TYPE
         7'b0110011 : begin
-                    
                     ALUAsrc = 0;    //rs1
                     ALUBsrc = 2'b00;//rs2
-                    Branch = 3'b111;//No Branch
+                    Branch = 3'b110;//PC + 4
                     memToReg = 1;   //ALU result
                     MemOp = 0;      //Yazma okuma yok
                     MemWr = 0;
                     RegWr = 1;      //Registera yazilir
-                    
                     case (func3)
                     //  ADD, SUB
                     3'b000 : ALUctrl = (func7 == 7'b0) ? 4'b0000 : 4'b1011; //ADD : SUB
@@ -98,12 +95,11 @@ module ControlUnit(instr, ALUAsrc, ALUBsrc, ALUctrl, Branch, memToReg, MemOp, Me
         7'b0010011 :  begin
                     ALUAsrc = 0;    //rs1
                     ALUBsrc = 2'b01;//offset
-                    Branch = 3'b111;//No Branch
+                    Branch = 3'b110;//PC + 4
                     memToReg = 1;   //ALU result
                     MemOp = 0;      //Yazma okuma yok
                     MemWr = 0;
                     RegWr = 1;      //Registera yazilir
-                    
                     case (func3)
                     3'b000 : ALUctrl = 4'b0000; //ADDI
                     3'b010 : ALUctrl = 4'b0001; //SLTI    
@@ -115,7 +111,64 @@ module ControlUnit(instr, ALUAsrc, ALUBsrc, ALUctrl, Branch, memToReg, MemOp, Me
                     3'b101 : ALUctrl = (func7 == 7'b0) ? 4'b1001 : (func7 == 7'b0100000) ? 4'b1010 : 4'bx; //SRLI : SRAI : DC
                     endcase
                     end
-        
+        //  J - TYPE
+        7'b1101111 : begin  //JAL
+                    ALUAsrc = 1;    //PC
+                    ALUBsrc = 2'b01;//offset
+                    Branch = 3'b100;//PC + offset
+                    memToReg = 1;   //ALU result
+                    MemOp = 0;      //Yazma okuma yok
+                    MemWr = 0;
+                    RegWr = 1;      //Registera yazilir
+                    ALUctrl = 4'b0000;
+                    end
+        7'b1100111 : begin  //JALR
+                    ALUAsrc = 1;    //PC
+                    ALUBsrc = 2'b10;//+4
+                    Branch = 3'b100;//PC + offset
+                    memToReg = 1;   //ALU result
+                    MemOp = 0;      //Yazma okuma yok
+                    MemWr = 0;
+                    RegWr = 1;      //Registera yazilir
+                    ALUctrl = 4'b0000;//ADD
+                    end
+        //  B - TYPE
+        7'b1100111 : begin
+                    ALUAsrc = 0;    //rs1
+                    ALUBsrc = 2'b00;//rs2
+                    memToReg = 1;   //ALU result
+                    MemOp = 0;      //Yazma okuma yok
+                    MemWr = 0;
+                    RegWr = 0;      //Registera yazilir
+                    ALUctrl = 4'b1011;//SUB
+                    case (func3)
+                    //BEQ
+                    3'b000 : Branch = 3'b000;//branch_condition'dan BEQ secilir  
+                    //BNE
+                    3'b001 : Branch = 3'b001;  //bc'dan BNE secilir
+                    //BLT
+                    3'b100 : Branch = 3'b010;  //bc'dan BLT secilir
+                    //BGE
+                    3'b101 : Branch = 3'b011;  //bc'dan BGE secilir
+                    //BLTU
+                    3'b110 : Branch = 3'b010;  //bc'dan BLTU secilir
+                    //BGEU
+                    3'b111: Branch = 3'b011;   //bc'dan BGEU secilir
+                    endcase
+                    end
+        //  S - TYPE
+        7'b0000011 : begin
+                    ALUAsrc = 0;    //rs1
+                    ALUBsrc = 2'b00;//rs2
+                    memToReg = 1;   //ALU result
+                    MemOp = 0;      //Yazma okuma yok
+                    MemWr = 0;
+                    RegWr = 0;      //Registera yazilir
+                    ALUctrl = 4'b1011;//SUB
+                    case (func3)
+                    
+                    endcase
+                    end
         endcase    
     end
     
