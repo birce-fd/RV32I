@@ -40,7 +40,7 @@ module regfile(rna, rnb, d, addr, we, clk, clr, qa, qb);
         //yazma islemi
         else if (we)
             //reg_file[addr] <= d;
-            reg_file[addr] <= (addr[0] == 0) ? 0 : d;
+            reg_file[addr] <= (addr[4:0] == 0) ? 0 : d;
     end
     //okuma islemi
     always @(*) begin
