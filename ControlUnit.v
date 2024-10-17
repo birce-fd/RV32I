@@ -48,8 +48,8 @@ module ControlUnit(instr, ALUAsrc, ALUBsrc, ALUctrl, Branch, memToReg, MemOp, Me
                     ALUctrl = 4'b0; //ADD
                     Branch = 3'b110;//PC + 4
                     memToReg = 1;   //ALU result
-                    MemOp = 0;      //Yazma OKuma yok
-                    MemWr = 0;
+                    MemOp = 3'bx;   //ALU result, ne secildigi onemsiz
+                    MemWr = 0;      //yazma yok
                     RegWr = 1;      //Registera yazılır
                     end
         //  AIUPC
@@ -59,8 +59,8 @@ module ControlUnit(instr, ALUAsrc, ALUBsrc, ALUctrl, Branch, memToReg, MemOp, Me
                     ALUctrl = 4'b0; //ADD
                     Branch = 3'b110;//PC + 4
                     memToReg = 1;   //ALU result
-                    MemOp = 0;      //Yazma okuma yok
-                    MemWr = 0;
+                    MemOp = 3'bx;   //ALU result, ne secildigi onemsiz
+                    MemWr = 0;      //yazma yok
                     RegWr = 1;      //Registera yazilir
                     end
         //  R - TYPE
@@ -69,8 +69,8 @@ module ControlUnit(instr, ALUAsrc, ALUBsrc, ALUctrl, Branch, memToReg, MemOp, Me
                     ALUBsrc = 2'b00;//rs2
                     Branch = 3'b110;//PC + 4
                     memToReg = 1;   //ALU result
-                    MemOp = 0;      //Yazma okuma yok
-                    MemWr = 0;
+                    MemOp = 3'bx;   //ALU result, ne secildigi onemsiz
+                    MemWr = 0;      //yazma yok
                     RegWr = 1;      //Registera yazilir
                     case (func3)
                     //  ADD, SUB
@@ -97,8 +97,8 @@ module ControlUnit(instr, ALUAsrc, ALUBsrc, ALUctrl, Branch, memToReg, MemOp, Me
                     ALUBsrc = 2'b01;//offset
                     Branch = 3'b110;//PC + 4
                     memToReg = 1;   //ALU result
-                    MemOp = 0;      //Yazma okuma yok
-                    MemWr = 0;
+                    MemOp = 3'bx;   //ALU result, ne secildigi onemsiz
+                    MemWr = 0;      //yazma yok
                     RegWr = 1;      //Registera yazilir
                     case (func3)
                     3'b000 : ALUctrl = 4'b0000; //ADDI
@@ -117,8 +117,8 @@ module ControlUnit(instr, ALUAsrc, ALUBsrc, ALUctrl, Branch, memToReg, MemOp, Me
                     ALUBsrc = 2'b01;//offset
                     Branch = 3'b100;//PC + offset
                     memToReg = 1;   //ALU result
-                    MemOp = 0;      //Yazma okuma yok
-                    MemWr = 0;
+                    MemOp = 3'bx;   //ALU result, ne secildigi onemsiz
+                    MemWr = 0;      //yazma yok
                     RegWr = 1;      //Registera yazilir
                     ALUctrl = 4'b0000;
                     end
@@ -127,8 +127,8 @@ module ControlUnit(instr, ALUAsrc, ALUBsrc, ALUctrl, Branch, memToReg, MemOp, Me
                     ALUBsrc = 2'b10;//+4
                     Branch = 3'b100;//PC + offset
                     memToReg = 1;   //ALU result
-                    MemOp = 0;      //Yazma okuma yok
-                    MemWr = 0;
+                    MemOp = 3'bx;   //ALU result, ne secildigi onemsiz
+                    MemWr = 0;      //yazma yok
                     RegWr = 1;      //Registera yazilir
                     ALUctrl = 4'b0000;//ADD
                     end
@@ -137,8 +137,8 @@ module ControlUnit(instr, ALUAsrc, ALUBsrc, ALUctrl, Branch, memToReg, MemOp, Me
                     ALUAsrc = 0;    //rs1
                     ALUBsrc = 2'b00;//rs2
                     memToReg = 1;   //ALU result
-                    MemOp = 0;      //Yazma okuma yok
-                    MemWr = 0;
+                    MemOp = 3'bx;   //ALU result, ne secildigi onemsiz
+                    MemWr = 0;      //yazma yok
                     RegWr = 0;      //Registera yazilir
                     ALUctrl = 4'b1011;//SUB
                     case (func3)
@@ -156,17 +156,64 @@ module ControlUnit(instr, ALUAsrc, ALUBsrc, ALUctrl, Branch, memToReg, MemOp, Me
                     3'b111: Branch = 3'b011;   //bc'dan BGEU secilir
                     endcase
                     end
-        //  S - TYPE
+        //  I - TYPE Memory buyruklari
         7'b0000011 : begin
                     ALUAsrc = 0;    //rs1
-                    ALUBsrc = 2'b00;//rs2
-                    memToReg = 1;   //ALU result
-                    MemOp = 0;      //Yazma okuma yok
-                    MemWr = 0;
+                    ALUBsrc = 2'b01;//offset
+                    memToReg = 0;   //memory secilir
                     RegWr = 0;      //Registera yazilir
-                    ALUctrl = 4'b1011;//SUB
+                    ALUctrl = 4'b0000;//Adres hesabi icin ADD
+                    Branch = 3'b110;  //PC + 4
                     case (func3)
-                    
+                        //LB
+                        3'b000 : begin
+                                MemOp = 3'b000;    //LB sinyali
+                                MemWr = 0;          //okuma sinyali
+                                end
+                        //LH
+                        3'b001 : begin
+                                MemOp = 3'b001;    //LH sinyali
+                                MemWr = 0;          //okuma sinyali
+                                end
+                        //LW
+                        3'b010 : begin
+                                MemOp = 3'b010;    //LW kodu
+                                MemWr = 0;          //okuma sinyali
+                                end
+                        //LBU
+                        3'b100 : begin
+                                MemOp = 3'b011;    //LBU kodu
+                                MemWr = 0;          //okuma sinyali
+                                end
+                        //LHU
+                        3'b101 : begin
+                                MemOp = 3'b100;    //LHU kodu
+                                MemWr = 0;          //okuma sinyali
+                                end
+                    endcase
+                    end
+        //  S - TYPE
+        7'b0100011 : begin
+                    ALUAsrc = 0;    //rs1
+                    ALUBsrc = 2'b01;//offset
+                    memToReg = 0;   //memory secilir
+                    RegWr = 0;      //Registera yazilir
+                    ALUctrl = 4'b0000;//Adres hesabi icin ADD
+                    Branch = 3'b110;  //PC + 4
+                    case (func3)
+                        //SB
+                        3'b000 : begin
+                                MemOp = 3'b000;    //SB kodu
+                                MemWr = 1;          //yazma sinyali
+                                end
+                        3'b001 : begin
+                                MemOp = 3'b001;    //SH kodu
+                                MemWr = 1;          //yazma sinyali
+                                end
+                        3'b010 : begin
+                                MemOp = 3'b010;    //SW kodu
+                                MemWr = 1;          //yazma sinyali
+                                end
                     endcase
                     end
         endcase    
