@@ -30,12 +30,17 @@ module regfile(rna, rnb, d, addr, we, clk, clr, qa, qb);
     
     reg [31:0]reg_file[31:0];
     
+    initial begin
+        reg_file[0] = 0;
+    end
+    
     always @ (posedge clk or negedge clr) begin
         if (!clr)   
             reg_file[addr] <= 0;
         //yazma islemi
         else if (we)
-            reg_file[addr] <= d;
+            //reg_file[addr] <= d;
+            reg_file[addr] <= (addr[0] == 0) ? 0 : d;
     end
     //okuma islemi
     always @(*) begin
