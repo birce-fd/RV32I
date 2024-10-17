@@ -23,11 +23,11 @@
 module data_mem(
     input wire clk,              //ckl sinyali
     input wire rst,              
-    input wire [11:0] Addr,      // Bellek adresi (hangi adrese yazýlacaðýný söylüyor)
-    input wire [31:0] DataIn,    // Yazma verisi (iþlemci tarafýndan belleðe yazýlacak olan veriyi taþýr)
-    input wire MemOp,            // Okuma/Yazma iþlemi kontrol sinyali 
-    input wire MemWr,            // Belleðe yazma sinyali 
-    output reg [31:0] DataOut    // Okunan veri 
+    input wire [11:0] Addr,      // Bellek adresi (hangi adrese yazï¿½lacaï¿½ï¿½nï¿½ sï¿½ylï¿½yor)
+    input wire [31:0] DataIn,    // Yazma verisi (iï¿½lemci tarafï¿½ndan belleï¿½e yazï¿½lacak olan veriyi taï¿½ï¿½r)
+    input wire [2:0]MemOp,       // Okuma/Yazma islemi icin kontrol sinyali  
+    input wire MemWr,            // Belleï¿½e yazma sinyali                  
+    output reg [31:0] DataOut    // Okunan veri                             
 
     );
     
@@ -37,27 +37,60 @@ module data_mem(
     $readmemb("memory_initialization_file.mif", dmem);
 end
 
+    /*  
+    Gelen MemOp ve MemWr sinyalleri anlamlari:
+    MemWr + 3 bit MemOp
+    0000 -> LB,  0001 -> LH,  0010 -> LW,  0011 -> LBU, 0100 -> LHU
+    1000 -> SB,  1001 -> SH,  1010 -> SW
+
+    */
+
+
     always @(posedge clk or posedge rst) begin
         if (rst) begin
-            // Reset durumunda çýkýþý sýfýrla
+            // Reset durumunda ï¿½ï¿½kï¿½ï¿½ï¿½ sï¿½fï¿½rla
             DataOut <= 32'b0;
         end else begin
-            // Yazma 
-            if (MemWr && MemOp) begin
-                // DataIn'i ilgili adrese yaz
-                dmem[Addr]     <= DataIn[7:0];    // Ýlk byte
-                dmem[Addr+1]   <= DataIn[15:8];   // Ýkinci byte
-                dmem[Addr+2]   <= DataIn[23:16];  // Üçüncü byte
-                dmem[Addr+3]   <= DataIn[31:24];  // Dördüncü byte
-            end
-            // Okuma 
-            else if (!MemWr && MemOp) begin
-                // Byte byte bellekten okuma
-                DataOut[7:0]   <= dmem[Addr];     // Ýlk byte
-                DataOut[15:8]  <= dmem[Addr+1];   // Ýkinci byte
-                DataOut[23:16] <= dmem[Addr+2];   // Üçüncü byte
-                DataOut[31:24] <= dmem[Addr+3];   // Dördüncü byte
-            end
+            // Yazma islemleri 
+            case ({MemWr, MemOp})
+                //SB
+                4'b1000 : begin
+                    dmem[Addr] <= DataIn[7:0];    // ilk byte
+                end
+                //SH
+                4'b1001 : begin
+                    dmem[Addr]     <= DataIn[7:0];    // ilk byte
+                    dmem[Addr+1]   <= DataIn[15:8];   // ikinci byte
+                end
+                //SW
+                4'b1010 : begin
+                    dmem[Addr]     <= DataIn[7:0];    // ilk byte
+                    dmem[Addr+1]   <= DataIn[15:8];   // ikinci byte
+                    dmem[Addr+2]   <= DataIn[23:16];  // ucuncu byte
+                    dmem[Addr+3]   <= DataIn[31:24];  // dorduncu byte
+                end
+            
+            //Okuma islemleri
+                //LB
+                //Okuma islemi signed olarak yapildigi icin ilk 24 bite ilgili byte'in MSB'si yazilir 
+                4'b0000 : DataOut[31:0] <= {{24{dmem[Addr][7]}}, dmem[Addr]};
+
+                //LH
+                //Okuma islemi signed olarak yapildigi icin ilk 16 bite ilgili byte'in MSB'si yazilir 
+                4'b0001 : DataOut <= {{16{dmem[Addr + 1][7]}}, dmem[Addr + 1], dmem[Addr]};
+
+                //LW
+                //Secili 4 byte birlestirilir
+                4'b0010 : DataOut <= {dmem[Addr + 3], dmem[Addr + 2], dmem[Addr + 1], dmem[Addr]};
+
+                //LBU
+                //Unsigned oldugu icin ilk 24 bit 0 olur
+                4'b0011 : DataOut <= {24'b0, dmem[Addr]};
+                    
+                //LHU
+                //Unsigned oldugu icin ilk 16 bit 0 olur
+                4'b0100 : DataOut <= {16'b0, dmem[Addr + 1], dmem[Addr]};
+            endcase
         end
     end
      
