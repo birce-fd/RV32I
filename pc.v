@@ -21,8 +21,8 @@
 
 
 module program_counter(clk, clr, pc, next_pc);
-   input clk;
-   output [31:0] pc;
+   input clk, clr;
+   output reg [31:0] pc;
    input [31:0] next_pc;
 
    always @ (posedge clk, negedge clr) begin
