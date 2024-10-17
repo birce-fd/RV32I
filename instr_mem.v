@@ -30,12 +30,11 @@ module instr_mem(
   reg [31:0] imem [0:511];   
 
  always @(posedge clk) begin
-        instr <= imem[addr];    // ckl'nin yükselen kenarýnda fetch instruction 
+        instr <= imem[addr];    // ckl'nin y?kselen kenar?nda fetch instruction 
     end
 
-  initial begin
-       
+  initial begin 
        $readmemh("D:\instruction_list.txt",imem) ;
-       
        end
+       
 endmodule

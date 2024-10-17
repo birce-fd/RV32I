@@ -24,8 +24,8 @@ module mux_4x1(a, b, c, d, s, q);
 
     input [31:0]a, b, c, d;
     input [1:0]s;
-    output reg [31:0]q;
-    
+    output [31:0]q;
+    /*
     always @(s) begin
         
         case (s)
@@ -35,4 +35,21 @@ module mux_4x1(a, b, c, d, s, q);
             2'b11 : q = d;
         endcase
     end
+    */
+    
+    assign q = select(a, b, c, d, s);
+    
+    function [31:0]select;
+        input [31:0]a, b, c, d;
+        input [1:0]s;
+        case (s)
+            2'b00 : select = a;
+            2'b01 : select = b;
+            2'b10 : select = c;
+            2'b11 : select = d;
+        endcase
+        
+    endfunction
+    
+    
 endmodule

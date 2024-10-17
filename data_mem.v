@@ -23,10 +23,10 @@
 module data_mem(
     input wire clk,              //ckl sinyali
     input wire rst,              
-    input wire [11:0] Addr,      // Bellek adresi (hangi adrese yaz�laca��n� s�yl�yor)
-    input wire [31:0] DataIn,    // Yazma verisi (i�lemci taraf�ndan belle�e yaz�lacak olan veriyi ta��r)
+    input wire [11:0] Addr,      // Bellek adresi (hangi adrese yaz?laca??n? s?yl?yor)
+    input wire [31:0] DataIn,    // Yazma verisi (i?lemci taraf?ndan belle?e yaz?lacak olan veriyi ta??r)
     input wire [2:0]MemOp,       // Okuma/Yazma islemi icin kontrol sinyali  
-    input wire MemWr,            // Belle�e yazma sinyali                  
+    input wire MemWr,            // Belle?e yazma sinyali                  
     output reg [31:0] DataOut    // Okunan veri                             
 
     );
@@ -46,9 +46,9 @@ end
     */
 
 
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
-            // Reset durumunda ��k��� s�f�rla
+    always @(posedge clk or negedge clk or negedge rst) begin
+        if (!rst) begin
+            // Reset durumunda ??k??? s?f?rla
             DataOut <= 32'b0;
         end else begin
             // Yazma islemleri 
@@ -77,11 +77,11 @@ end
 
                 //LH
                 //Okuma islemi signed olarak yapildigi icin ilk 16 bite ilgili byte'in MSB'si yazilir 
-                4'b0001 : DataOut <= {{16{dmem[Addr + 1][7]}}, dmem[Addr + 1], dmem[Addr]};
+                4'b0001 : DataOut[31:0] <= {{16{dmem[Addr + 1][7]}}, dmem[Addr + 1], dmem[Addr]};
 
                 //LW
                 //Secili 4 byte birlestirilir
-                4'b0010 : DataOut <= {dmem[Addr + 3], dmem[Addr + 2], dmem[Addr + 1], dmem[Addr]};
+                4'b0010 : DataOut[31:0] <= {dmem[Addr + 3], dmem[Addr + 2], dmem[Addr + 1], dmem[Addr]};
 
                 //LBU
                 //Unsigned oldugu icin ilk 24 bit 0 olur
@@ -93,6 +93,5 @@ end
             endcase
         end
     end
-     
 
 endmodule

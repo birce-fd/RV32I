@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module ControlUnit(instr, ALUAsrc, ALUBsrc, ALUctrl, Branch, memToReg, MemOp, MemWr, RegWr, PCAsrc, PCBsrc);
+module ControlUnit(instr, ALUAsrc, ALUBsrc, ALUctrl, Branch, memToReg, MemOp, MemWr, RegWr);
     input [31:0] instr; // [6:0]opcode, [31:25] func7, [14:12] func3
     output reg ALUAsrc;         // 0 -> rs1, 1 -> PC
     output reg [1:0]ALUBsrc;    // 00 -> rs2, 01 -> imm, 10 -> 4, 11 -> x
@@ -30,7 +30,6 @@ module ControlUnit(instr, ALUAsrc, ALUBsrc, ALUctrl, Branch, memToReg, MemOp, Me
     output reg [2:0]MemOp;
     output reg MemWr;
     output reg RegWr;
-    output reg PCAsrc, PCBsrc;
     
     wire [6:0]op = instr[6:0];
     wire [2:0]func3 = instr[14:12];
@@ -139,7 +138,7 @@ module ControlUnit(instr, ALUAsrc, ALUBsrc, ALUctrl, Branch, memToReg, MemOp, Me
                     memToReg = 1;   //ALU result
                     MemOp = 3'bx;   //ALU result, ne secildigi onemsiz
                     MemWr = 0;      //yazma yok
-                    RegWr = 0;      //Registera yazilir
+                    RegWr = 1;      //Registera yazilir
                     ALUctrl = 4'b1011;//SUB
                     case (func3)
                     //BEQ
@@ -161,7 +160,7 @@ module ControlUnit(instr, ALUAsrc, ALUBsrc, ALUctrl, Branch, memToReg, MemOp, Me
                     ALUAsrc = 0;    //rs1
                     ALUBsrc = 2'b01;//offset
                     memToReg = 0;   //memory secilir
-                    RegWr = 0;      //Registera yazilir
+                    RegWr = 1;      //Registera yazilir
                     ALUctrl = 4'b0000;//Adres hesabi icin ADD
                     Branch = 3'b110;  //PC + 4
                     case (func3)
@@ -197,7 +196,7 @@ module ControlUnit(instr, ALUAsrc, ALUBsrc, ALUctrl, Branch, memToReg, MemOp, Me
                     ALUAsrc = 0;    //rs1
                     ALUBsrc = 2'b01;//offset
                     memToReg = 0;   //memory secilir
-                    RegWr = 0;      //Registera yazilir
+                    RegWr = 1;      //Registera yazilir
                     ALUctrl = 4'b0000;//Adres hesabi icin ADD
                     Branch = 3'b110;  //PC + 4
                     case (func3)
