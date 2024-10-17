@@ -27,7 +27,7 @@ module ControlUnit(instr, ALUAsrc, ALUBsrc, ALUctrl, Branch, memToReg, MemOp, Me
     output reg [3:0]ALUctrl;
     output reg [2:0]Branch;
     output reg memToReg;
-    output reg MemOp;
+    output reg [2:0]MemOp;
     output reg MemWr;
     output reg RegWr;
     output reg PCAsrc, PCBsrc;
