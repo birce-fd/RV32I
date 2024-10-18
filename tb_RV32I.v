@@ -20,7 +20,9 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module tb_RV32I();
+module tb_RV32I(
+    input rx,
+    output tx);
     
     //reg [4:0]rna, rnb;  //Cikis icin secilecek olan rs1 ve rs2
     wire [31:0]data;     //register'a yazilacak olan data
@@ -151,6 +153,9 @@ module tb_RV32I();
             .q(data)
             );
     
+    
+    wire [7:0]tx_data, rx_data;
+    wire ready, busy, send;
     data_mem dmem (
             .clk(clk),
             .rst(clr),
@@ -158,7 +163,24 @@ module tb_RV32I();
             .DataIn(rs2),
             .MemOp(memOp),
             .MemWr(memWr),
-            .DataOut(mem_to_mux)
+            .DataOut(mem_to_mux),
+            .tx_data(tx_data),
+            .rx_data(rx_data),
+            .rx_ready(ready),
+            .tx_busy(busy),
+            .send(send)
+            );
+            
+    uart uart(
+            .clk(clk),
+            .reset(clr),
+            .send(send),
+            .tx_data(tx_data),
+            .rx(rx),
+            .tx(tx),
+            .busy(busy),
+            .rx_data(rx_data),
+            .rx_ready(ready)
             );
     initial begin
         clk = 0;
