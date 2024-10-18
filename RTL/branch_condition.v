@@ -41,9 +41,6 @@ module branch_condition(branch, LessFlag, ZeroFlag, PCAsrc, PCBsrc);
     //  PCA = 0 -> imm, PCA = 1 -> 4
     //  PCB = 0 -> PC,  PCB = 1 -> rs1
     
-    //  PCArsc ve PCBsrc 2x1 mux girişleri için select ucu olacak. Eger branch condition saglanmamis ise
-    //  PCAsrc = 1 ve PCBsrc = 0 (PC + 4)olacagi icin default olarak PCA = 1 ve PCB = 0 
-    //  olsun, kosul saglanmis ise PCAsrc = 0 olsun (PC + offset).
     
     
     //  Kosulsuz sekilde JAL ve JALR buruklarini calistirabilmek icin ZerFlag ve LEssFlag umursanmadan
