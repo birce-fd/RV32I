@@ -155,7 +155,7 @@ module ControlUnit(instr, ALUAsrc, ALUBsrc, ALUctrl, Branch, memToReg, MemOp, Me
                     3'b111: Branch = 3'b011;   //bc'dan BGEU secilir
                     endcase
                     end
-        //  I - TYPE Memory buyruklari
+        //  L - TYPE Memory buyruklari
         7'b0000011 : begin
                     ALUAsrc = 0;    //rs1
                     ALUBsrc = 2'b01;//offset
