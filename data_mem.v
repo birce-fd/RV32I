@@ -27,7 +27,11 @@ module data_mem(
     input wire [31:0] DataIn,    // Yazma verisi (i?lemci taraf?ndan belle?e yaz?lacak olan veriyi ta??r)
     input wire [2:0]MemOp,       // Okuma/Yazma islemi icin kontrol sinyali  
     input wire MemWr,            // Belle?e yazma sinyali                  
-    output reg [31:0] DataOut    // Okunan veri                             
+    output reg [31:0] DataOut,    // Okunan veri    
+    output reg [7:0]tx_data,
+    input [7:0]rx_data,
+    input rx_ready,
+    input tx_busy                
 
     );
     
@@ -64,10 +68,15 @@ end
                 end
                 //SW
                 4'b1010 : begin
-                    dmem[Addr]     <= DataIn[7:0];    // ilk byte
-                    dmem[Addr+1]   <= DataIn[15:8];   // ikinci byte
-                    dmem[Addr+2]   <= DataIn[23:16];  // ucuncu byte
-                    dmem[Addr+3]   <= DataIn[31:24];  // dorduncu byte
+                    //eger adres 0x404 ise uart secilmistir
+                    if (Addr == 12'h404 & rx_ready) begin
+                        dmem[Addr] <= rx_data;  //uarttan gelen data 
+                    end else begin
+                        dmem[Addr]     <= DataIn[7:0];    // ilk byte
+                        dmem[Addr+1]   <= DataIn[15:8];   // ikinci byte
+                        dmem[Addr+2]   <= DataIn[23:16];  // ucuncu byte
+                        dmem[Addr+3]   <= DataIn[31:24];  // dorduncu byte
+                    end
                 end
             
             //Okuma islemleri
@@ -81,7 +90,14 @@ end
 
                 //LW
                 //Secili 4 byte birlestirilir
-                4'b0010 : DataOut[31:0] <= {dmem[Addr + 3], dmem[Addr + 2], dmem[Addr + 1], dmem[Addr]};
+                4'b0010 : begin
+                        //adres 0x400 secilmis ise ve tx mesgul degilse
+                        if(Addr == 12'h400 & !tx_busy) begin
+                            tx_data <= dmem[Addr];
+                        end else begin
+                            DataOut[31:0] <= {dmem[Addr + 3], dmem[Addr + 2], dmem[Addr + 1], dmem[Addr]};     
+                        end
+                    end
 
                 //LBU
                 //Unsigned oldugu icin ilk 24 bit 0 olur
