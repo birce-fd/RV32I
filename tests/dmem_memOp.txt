@@ -1,0 +1,9 @@
+MemWr + 3 bit MemOp
+0000 -> LB
+0001 -> LH
+0010 -> LW
+0011 -> LBU
+0100 -> LHU
+1000 -> SB
+1001 -> SH
+1010 -> SW
