@@ -93,8 +93,8 @@ module tb_RV32I(
     mux_4x1 ALUBmux (
             .a(rs2),
             .b(imm32),
-            .c(32'd4),
-            .d(32'b0),
+            .c(32'h00000004),
+            .d(32'bx),
             .s(ALUBsrc),
             .q(muxb_to_alu)
             );
@@ -124,7 +124,7 @@ module tb_RV32I(
             );
     wire [31:0]pca, pcb;
     mux_2x1 PCAmux  (
-            .a(32'h00000001),
+            .a(32'h00000004),
             .b(imm32),
             .s(PCAsrc),
             .q(pca)
